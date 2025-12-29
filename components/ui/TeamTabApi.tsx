@@ -12,7 +12,6 @@ import {
     Award,
     Loader2
 } from 'lucide-react';
-import { fetchTeamMembersGrouped, GroupedTeamMembers, getImageUrl } from '../../api/teamApi';
 
 interface TeamMember {
     name: string;
@@ -24,15 +23,231 @@ interface TeamMember {
     subteam: string;
 }
 
+interface GroupedTeamMembers {
+    [subteam: string]: TeamMember[];
+}
+
 interface TeamTabApiProps {
     className?: string;
 }
 
+// Fallback data when API is not available (for production deployment)
+const FALLBACK_MEMBERS: GroupedTeamMembers = {
+    'Leadership': [
+        {
+            name: 'Tajbir Ahmed',
+            role: 'TEAM LEAD',
+            title: 'Project Director',
+            img: '/assets/tajbir-ahmed.jpg',
+            description: 'Leading Team OSHSHAROHI towards engineering excellence and racing glory. Tajbir brings vision, leadership, and unwavering dedication to push the boundaries of what our team can achieve.',
+            color: 'brand-red',
+            subteam: 'Leadership'
+        },
+        {
+            name: 'Mahir Dyan',
+            role: 'CO-TEAM LEAD',
+            title: 'Deputy Project Director',
+            img: '/assets/mahir-dyan.jpg',
+            description: 'Driving innovation and coordination across all team divisions. Mahir ensures seamless collaboration and operational excellence throughout the organization.',
+            color: 'orange-500',
+            subteam: 'Leadership'
+        }
+    ],
+    'Electronics & Powertrain': [
+        {
+            name: 'Md. Shafinuzzaman',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/shafinuzzaman.jpg',
+            description: 'Optimizing the energy flow and power delivery systems. Shafinuzzaman brings technical expertise in mechatronics and mechanical engineering to ensure peak performance.',
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        },
+        {
+            name: 'Abrar Bin Zakir',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/abrar-bin-zakir.jpg',
+            description: 'From data acquisition and wiring to engine performance and transmission, Abrar controls the lifeblood of our vehicle with expertise in electronics and powertrain systems.',
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        },
+        {
+            name: 'Moobta Sim Tajwar',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/moobta-sim-tajwar.jpg',
+            description: 'Bringing innovation to our powertrain systems. Moobta ensures seamless integration of electronics with mechanical components for optimal performance.',
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        },
+        {
+            name: 'Nowroz Ahmad',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/nowroz-ahmad.jpg',
+            description: 'Engineering excellence in drivetrain systems. Nowroz focuses on power transmission and vehicle dynamics to maximize track performance.',
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        },
+        {
+            name: 'Md. Jarif Alam',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/jarif-alam.jpg',
+            description: "Expertise in electronic control systems and powertrain integration. Jarif brings precision engineering to our vehicle's core systems.",
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        },
+        {
+            name: 'S.M. Rafiur Rahman Swapnil',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/rafiur-rahman-swapnil.jpg',
+            description: 'Dedicated to optimizing power delivery and electronic systems. Swapnil brings expertise in mechatronics to enhance our vehicle performance.',
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        },
+        {
+            name: 'Anan Intesar Bin Faiz',
+            role: 'ELECTRONICS & POWERTRAIN',
+            title: 'Electronics, Powertrain & Drivetrain',
+            img: '/assets/anan-intesar.jpg',
+            description: 'From data acquisition and wiring to engine performance and transmission, Anan controls the lifeblood of our vehicle with expertise in electronics and powertrain systems.',
+            color: 'blue-500',
+            subteam: 'Electronics & Powertrain'
+        }
+    ],
+    'Business & Marketing': [
+        {
+            name: 'Ashfia Rahman',
+            role: 'BUSINESS & MARKETING',
+            title: 'Business, Marketing & Logistics',
+            img: '/assets/ashfia-rahman.jpg',
+            description: "Driving brand visibility and sponsorship relations. Ashfia brings strategic marketing expertise to elevate Team OSHSHAROHI's presence in the motorsport community.",
+            color: 'purple-500',
+            subteam: 'Business & Marketing'
+        },
+        {
+            name: 'Nuzhat Tasnim',
+            role: 'BUSINESS & MARKETING',
+            title: 'Business, Marketing & Logistics',
+            img: '/assets/nuzhat-tasnim.jpg',
+            description: 'Managing logistics and event coordination. Nuzhat ensures smooth operations and seamless execution of all team activities and competitions.',
+            color: 'purple-500',
+            subteam: 'Business & Marketing'
+        },
+        {
+            name: 'Asad Ullah Akib',
+            role: 'BUSINESS & MARKETING',
+            title: 'Business, Marketing & Logistics',
+            img: '/assets/asad-ullah-akib.jpg',
+            description: 'Building partnerships and securing sponsorships. Akib brings business development expertise to fuel our racing ambitions.',
+            color: 'purple-500',
+            subteam: 'Business & Marketing'
+        },
+        {
+            name: 'Proggha Parmita Sakura',
+            role: 'BUSINESS & MARKETING',
+            title: 'Business, Marketing & Logistics',
+            img: '/assets/proggha-parmita-sakura.jpg',
+            description: 'Leading content creation and social media strategy. Sakura connects our team with fans and supporters through engaging storytelling.',
+            color: 'purple-500',
+            subteam: 'Business & Marketing'
+        }
+    ],
+    'Chassis & Suspension': [
+        {
+            name: 'Kazi Ahnaf Muttaquif Ahmed',
+            role: 'CHASSIS & SUSPENSION',
+            title: 'Chassis and Suspension',
+            img: '/assets/kazi-ahnaf-muttaquif.jpg',
+            description: 'Engineering the structural backbone of our race car. Kazi ensures the chassis provides optimal rigidity and safety while minimizing weight.',
+            color: 'green-500',
+            subteam: 'Chassis & Suspension'
+        },
+        {
+            name: 'Suhail Ashraf',
+            role: 'CHASSIS & SUSPENSION',
+            title: 'Chassis & Suspension',
+            img: '/assets/suhail-ashraf.jpg',
+            description: 'Designing suspension geometry for maximum grip and handling. Suhail optimizes vehicle dynamics for peak cornering performance.',
+            color: 'green-500',
+            subteam: 'Chassis & Suspension'
+        },
+        {
+            name: 'Muhtasim Saad Shameem',
+            role: 'CHASSIS & SUSPENSION',
+            title: 'Chassis & Suspension',
+            img: '/assets/muhtasim-saad-shameem.jpg',
+            description: 'Focused on suspension tuning and ride quality. Muhtasim brings expertise in vehicle dynamics to enhance driver confidence.',
+            color: 'green-500',
+            subteam: 'Chassis & Suspension'
+        },
+        {
+            name: 'Khandkar Sajiduzzaman',
+            role: 'CHASSIS & SUSPENSION',
+            title: 'Chassis & Suspension',
+            img: '/assets/khandkar-sajiduzzaman.jpg',
+            description: 'Structural analysis and chassis optimization specialist. Sajiduzzaman ensures our frame meets the highest safety and performance standards.',
+            color: 'green-500',
+            subteam: 'Chassis & Suspension'
+        }
+    ],
+    'Aerodynamics & Ergonomics': [
+        {
+            name: 'Ishmam Mohammed Chowdhury',
+            role: 'AERODYNAMICS & ERGONOMICS',
+            title: 'Aerodynamics & Ergonomics',
+            img: '/assets/ishmam-mohammed-chowdhury.jpg',
+            description: 'Specializing in aerodynamic design and driver comfort. Ishmam optimizes airflow and cockpit ergonomics for peak performance and driver experience.',
+            color: 'cyan-500',
+            subteam: 'Aerodynamics & Ergonomics'
+        },
+        {
+            name: 'Nafiz Shahriar Sami',
+            role: 'AERODYNAMICS & ERGONOMICS',
+            title: 'Aerodynamics & Ergonomics',
+            img: '/assets/nafiz-shahriar-sami.jpg',
+            description: 'Engineering excellence in downforce and drag optimization. Nafiz brings innovative solutions to maximize vehicle aerodynamic efficiency.',
+            color: 'cyan-500',
+            subteam: 'Aerodynamics & Ergonomics'
+        },
+        {
+            name: 'Sahil Sajjad',
+            role: 'AERODYNAMICS & ERGONOMICS',
+            title: 'Aerodynamics & Ergonomics',
+            img: '/assets/sahil-sajjad.jpg',
+            description: 'Focused on CFD analysis and wind tunnel testing. Sahil ensures our aerodynamic package delivers optimal performance on the track.',
+            color: 'cyan-500',
+            subteam: 'Aerodynamics & Ergonomics'
+        },
+        {
+            name: 'Nishat Jahan Nabila',
+            role: 'AERODYNAMICS & ERGONOMICS',
+            title: 'Aerodynamics & Ergonomics',
+            img: '/assets/nishat-jahan-nabila.jpg',
+            description: 'Expertise in ergonomic design and human factors engineering. Nabila creates driver interfaces that enhance control and reduce fatigue.',
+            color: 'cyan-500',
+            subteam: 'Aerodynamics & Ergonomics'
+        },
+        {
+            name: 'Maruf Mahmud',
+            role: 'AERODYNAMICS & ERGONOMICS',
+            title: 'Aerodynamics & Ergonomics',
+            img: '/assets/maruf-mahmud.jpg',
+            description: 'Dedicated to aerodynamic component design and testing. Maruf brings precision engineering to wings, diffusers, and body panels.',
+            color: 'cyan-500',
+            subteam: 'Aerodynamics & Ergonomics'
+        }
+    ]
+};
+
 const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
     const [members, setMembers] = useState<GroupedTeamMembers | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+    const [usingFallback, setUsingFallback] = useState(false);
 
     // Track which sections are expanded (all collapsed by default)
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -47,12 +262,43 @@ const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
         async function loadMembers() {
             try {
                 setLoading(true);
-                const data = await fetchTeamMembersGrouped();
-                setMembers(data);
-                setError(null);
+
+                // Try to fetch from API
+                const API_BASE_URL = 'http://localhost:3001';
+                const response = await fetch(`${API_BASE_URL}/api/team-members-grouped`, {
+                    signal: AbortSignal.timeout(3000) // 3 second timeout
+                });
+
+                if (!response.ok) {
+                    throw new Error('API not available');
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    // Transform API data
+                    const transformedData: GroupedTeamMembers = {};
+                    for (const [subteam, apiMembers] of Object.entries(result.data)) {
+                        transformedData[subteam] = (apiMembers as any[]).map(m => ({
+                            name: m.name,
+                            role: m.role,
+                            title: m.title,
+                            img: m.img || m.image_path || '',
+                            description: m.description,
+                            color: m.color,
+                            subteam: subteam
+                        }));
+                    }
+                    setMembers(transformedData);
+                    setUsingFallback(false);
+                } else {
+                    throw new Error('Invalid API response');
+                }
             } catch (err) {
-                console.error('Failed to load team members:', err);
-                setError('Failed to load team members from database');
+                // Use fallback data when API is not available
+                console.log('API not available, using fallback data');
+                setMembers(FALLBACK_MEMBERS);
+                setUsingFallback(true);
             } finally {
                 setLoading(false);
             }
@@ -67,41 +313,12 @@ const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
         }));
     };
 
-    // Transform API data to component format
-    const transformMembers = (apiMembers: any[]): TeamMember[] => {
-        return apiMembers.map(m => ({
-            name: m.name,
-            role: m.role,
-            title: m.title,
-            img: getImageUrl(m.img || m.image_path || ''),
-            description: m.description,
-            color: m.color,
-            subteam: m.subteam || ''
-        }));
-    };
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 text-brand-red animate-spin mx-auto mb-4" />
-                    <p className="text-gray-400">Loading team members from database...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <p className="text-red-400 mb-4">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-4 py-2 bg-brand-red text-white rounded-lg hover:bg-red-700"
-                    >
-                        Retry
-                    </button>
+                    <p className="text-gray-400">Loading team members...</p>
                 </div>
             </div>
         );
@@ -112,11 +329,11 @@ const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
     }
 
     // Get members by subteam
-    const leadership = transformMembers(members['Leadership'] || []);
-    const electronicsPowertrain = transformMembers(members['Electronics & Powertrain'] || []);
-    const businessMarketing = transformMembers(members['Business & Marketing'] || []);
-    const chassisSuspension = transformMembers(members['Chassis & Suspension'] || []);
-    const aerodynamicsErgonomics = transformMembers(members['Aerodynamics & Ergonomics'] || []);
+    const leadership = members['Leadership'] || [];
+    const electronicsPowertrain = members['Electronics & Powertrain'] || [];
+    const businessMarketing = members['Business & Marketing'] || [];
+    const chassisSuspension = members['Chassis & Suspension'] || [];
+    const aerodynamicsErgonomics = members['Aerodynamics & Ergonomics'] || [];
 
     // Section renderer helper
     const renderSection = (
@@ -127,7 +344,7 @@ const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
         iconBgClass: string,
         iconColorClass: string,
         titleHoverClass: string,
-        members: TeamMember[],
+        sectionMembers: TeamMember[],
         delay: number = 0
     ) => (
         <div>
@@ -160,7 +377,7 @@ const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
                         style={{ overflow: 'hidden' }}
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {members.map((member, index) => (
+                            {sectionMembers.map((member, index) => (
                                 <motion.div
                                     key={member.name}
                                     initial={{ opacity: 0, y: 30 }}
@@ -254,7 +471,6 @@ const TeamTabApi: React.FC<TeamTabApiProps> = ({ className = '' }) => {
 
                                     <div className="mt-8 pt-6 border-t border-slate-700">
                                         <p className="text-gray-500 text-sm">Team OSHSHAROHI • BRAC University</p>
-                                        <p className="text-gray-600 text-xs mt-1">Data loaded from SQLite database</p>
                                     </div>
                                 </div>
                             </div>
