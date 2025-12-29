@@ -36,7 +36,7 @@ const Sponsors: React.FC = () => {
     ];
 
     return (
-        <section id="sponsors" className="py-20 bg-gray-950 text-center">
+        <section id="sponsors" className="py-20 bg-slate-900 text-center">
             <div className="max-w-7xl mx-auto px-4">
                 <motion.div
                     initial="hidden"

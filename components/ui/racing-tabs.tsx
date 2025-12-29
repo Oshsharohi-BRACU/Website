@@ -18,6 +18,7 @@ import {
     Layers,
     Wind
 } from 'lucide-react';
+import { TeamTabApi } from './TeamTabApi';
 
 // Tab configuration
 const tabs = [
@@ -157,7 +158,7 @@ const RacingTabs: React.FC<RacingTabsProps> = ({ className = '' }) => {
                             className="w-full"
                         >
                             {activeTab === 'department' && <DepartmentTab />}
-                            {activeTab === 'team' && <TeamTab />}
+                            {activeTab === 'team' && <TeamTabApi />}
                             {activeTab === 'workshop' && <WorkshopTab />}
                             {activeTab === 'competition' && <CompetitionTab />}
                             {activeTab === 'research' && <ResearchTab />}

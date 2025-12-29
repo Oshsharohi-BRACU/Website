@@ -65,12 +65,12 @@ const MainContent: React.FC<MainContentProps> = ({ toggleTheme, isDark }) => {
 
       {/* Hero Content - "Exploding" from car position concept */}
       <motion.div
-        className="pt-32 pb-12 px-4 max-w-7xl mx-auto"
+        className="pt-32 pb-4 px-4 max-w-7xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="text-center mb-16">
+        <div className="text-center mb-6">
           <motion.h2
             variants={itemVariants}
             className="text-5xl md:text-7xl font-display font-black text-slate-900 dark:text-white mb-4"
